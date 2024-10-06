@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Request, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
@@ -13,7 +13,11 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User registered successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async register(@Body() body: RegisterDto) {
-    return this.authService.register(body);
+    try {
+      return await this.authService.register(body);
+    } catch (error) {
+      throw new HttpException(error.message || 'Registration failed', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('login')
@@ -21,10 +25,26 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   async login(@Body() body: LoginDto) {
-    const user = await this.authService.validateUser(body.email, body.password);
-    if (!user) {
-      return { message: 'Invalid credentials' };
+    try {
+      const user = await this.authService.validateUser(body.email, body.password);
+      if (!user) {
+        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      }
+      return this.authService.login(user);
+    } catch (error) {
+      throw new HttpException(error.message || 'Login failed', HttpStatus.UNAUTHORIZED);
     }
-    return this.authService.login(user);
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Access token refreshed successfully.' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token.' })
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    try {
+      return await this.authService.refreshAccessToken(refreshToken);
+    } catch (error) {
+      throw new HttpException(error.message || 'Refresh token invalid', HttpStatus.UNAUTHORIZED);
+    }
   }
 }
