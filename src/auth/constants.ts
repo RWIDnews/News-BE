@@ -1,5 +1,5 @@
 
 export const jwtConstants = {
-    secret: 'yourSecretKey', // Replace with a secure key in production
+    secret: process.env.SECRET_KEY, // Replace with a secure key in production
   };
   
