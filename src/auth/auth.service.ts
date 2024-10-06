@@ -1,8 +1,7 @@
 // src/auth/auth.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma.service'; // Create a PrismaService to access Prisma Client
+import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -21,10 +20,23 @@ export class AuthService {
     return null;
   }
 
+
   async login(user: any) {
-    const payload = { username: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user.id };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    // Save refreshToken to the database associated with the user
+    await this.prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+      },
+    });
+
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -39,5 +51,27 @@ export class AuthService {
     });
     const { password, ...result } = user;
     return result;
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      const tokenInDb = await this.prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+      });
+
+      if (!tokenInDb) {
+        throw new Error('Invalid refresh token');
+      }
+
+      const accessToken = this.jwtService.sign(
+        { email: payload.email, sub: payload.sub },
+        { expiresIn: '15m' },
+      );
+
+      return { accessToken };
+    } catch (e) {
+      throw new Error('Invalid refresh token');
+    }
   }
 }

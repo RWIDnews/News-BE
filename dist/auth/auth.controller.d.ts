@@ -12,8 +12,10 @@ export declare class AuthController {
         updatedAt: Date;
     }>;
     login(body: LoginDto): Promise<{
-        access_token: string;
-    } | {
-        message: string;
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    refresh(refreshToken: string): Promise<{
+        accessToken: string;
     }>;
 }

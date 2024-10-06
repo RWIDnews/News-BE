@@ -22,14 +22,32 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async register(body) {
-        return this.authService.register(body);
+        try {
+            return await this.authService.register(body);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message || 'Registration failed', common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async login(body) {
-        const user = await this.authService.validateUser(body.email, body.password);
-        if (!user) {
-            return { message: 'Invalid credentials' };
+        try {
+            const user = await this.authService.validateUser(body.email, body.password);
+            if (!user) {
+                throw new common_1.HttpException('Invalid credentials', common_1.HttpStatus.UNAUTHORIZED);
+            }
+            return this.authService.login(user);
         }
-        return this.authService.login(user);
+        catch (error) {
+            throw new common_1.HttpException(error.message || 'Login failed', common_1.HttpStatus.UNAUTHORIZED);
+        }
+    }
+    async refresh(refreshToken) {
+        try {
+            return await this.authService.refreshAccessToken(refreshToken);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error.message || 'Refresh token invalid', common_1.HttpStatus.UNAUTHORIZED);
+        }
     }
 };
 exports.AuthController = AuthController;
@@ -53,6 +71,16 @@ __decorate([
     __metadata("design:paramtypes", [auth_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('refresh'),
+    (0, swagger_1.ApiOperation)({ summary: 'Refresh access token' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Access token refreshed successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid refresh token.' }),
+    __param(0, (0, common_1.Body)('refreshToken')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refresh", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),
