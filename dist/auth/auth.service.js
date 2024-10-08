@@ -55,7 +55,6 @@ let AuthService = class AuthService {
         return result;
     }
     async refreshAccessToken(refreshToken) {
-        console.log(refreshToken, 111111111111);
         try {
             const payload = this.jwtService.verify(refreshToken);
             const tokenInDb = await this.prisma.refreshToken.findUnique({

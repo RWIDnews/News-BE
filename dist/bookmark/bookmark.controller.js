@@ -23,7 +23,6 @@ let BookmarkController = class BookmarkController {
     }
     async createBookmark(newsId, req) {
         const userId = req.user.id;
-        console.log('--==-', userId);
         return this.bookmarkService.createBookmark(userId, newsId);
     }
     async removeBookmark(newsId, req) {
