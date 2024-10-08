@@ -19,7 +19,6 @@ export class BookmarkController {
   async createBookmark(@Param('newsId') newsId: number, @Req() req: Request): Promise<Bookmark> {
     
     const userId = req.user.id;
-    console.log('--==-', userId);
     return this.bookmarkService.createBookmark(userId, newsId);
   }
 
