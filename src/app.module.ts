@@ -11,9 +11,11 @@ import { NewsModule } from './news/news.module';
 import { FavoriteController } from './favorite/favorite.controller';
 import { FavoriteService } from './favorite/favorite.service';
 import { FavoriteModule } from './favorite/favorite.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScrapingService } from './scraping.service';
 
 @Module({
-  imports: [AuthModule, HistoryModule, NewsModule, FavoriteModule],
+  imports: [AuthModule, HistoryModule, NewsModule, FavoriteModule, ScheduleModule.forRoot()],
   controllers: [HistoryController, NewsController, FavoriteController],
   providers: [AppService, PrismaService, HistoryService, NewsService, FavoriteService],
   exports: [PrismaService]

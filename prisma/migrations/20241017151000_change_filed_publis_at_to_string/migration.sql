@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "News" ALTER COLUMN "publishedAt" DROP NOT NULL,
+ALTER COLUMN "publishedAt" DROP DEFAULT,
+ALTER COLUMN "publishedAt" SET DATA TYPE TEXT;
