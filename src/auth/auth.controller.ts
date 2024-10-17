@@ -1,7 +1,9 @@
-import { Controller, Post, Body, Request, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, HttpException, HttpStatus, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { RegisterDto, LoginDto, UpdateDto } from './dto/auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -36,6 +38,8 @@ export class AuthController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Access token refreshed successfully.' })
@@ -43,6 +47,38 @@ export class AuthController {
   async refresh(@Body('refreshToken') refreshToken: string) {
     try {
       return await this.authService.refreshAccessToken(refreshToken);
+    } catch (error) {
+      throw new HttpException(error.message || 'Refresh token invalid', HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update user profile' })
+  @ApiResponse({ status: 200, description: 'User profile updated successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @Post('profile')
+  async profile(@Body() body: UpdateDto, @Req() req: Request) {
+    try {
+      const userId = req.user['userId'];
+      
+      return await this.authService.updateProfile(userId, body);
+    } catch (error) {
+      throw new HttpException(error.message || 'Failed update profile.', HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @Get()
+  async getProfile(@Req() req: Request) {
+    try {
+      const userId = req.user.id;
+      return await this.authService.getProfile(userId);
     } catch (error) {
       throw new HttpException(error.message || 'Refresh token invalid', HttpStatus.UNAUTHORIZED);
     }
