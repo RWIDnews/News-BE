@@ -22,7 +22,7 @@ export class NewsDto {
   imageUrl: string;
 
   @ApiProperty({ description: 'Date and time when the news was published' })
-  publishedAt: Date;
+  publishedAt: string;
 
   @ApiProperty({ description: 'Unique identifier of the publisher' })
   publisherId: number;
