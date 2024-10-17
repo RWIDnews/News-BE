@@ -11,13 +11,15 @@ export class NewsController {
   @Get()
   @ApiQuery({ name: 'page', required: false, description: 'Page number', type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', type: Number, example: 10 })
+  @ApiQuery({ name: 'category', required: false, description: 'Category of news', type: String, example: 'Technology' })
   @ApiOperation({ summary: 'Get list of news' })
   @ApiResponse({ status: 200, description: 'List of news', type: PaginatedNewsDto })
   async getNews(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('category') category?: string,
   ): Promise<{ data: NewsDto[]; total: number; page: number; limit: number }> {
-    return this.newsService.getNews({ page, limit });
+    return this.newsService.getNews({ page, limit, category });
   }
 
   @Get(':newsId')

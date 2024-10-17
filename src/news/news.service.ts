@@ -7,11 +7,16 @@ import { NewsDto } from './dto/news.dto';
 export class NewsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getNews({ page, limit }: { page: number; limit: number }): Promise<{ data: NewsDto[]; total: number; page: number; limit: number }> {
+  async getNews({ page, limit, category }: { page: number; limit: number, category?: string }): Promise<{ data: NewsDto[]; total: number; page: number; limit: number }> {
     const total = await this.prisma.news.count();
     
     const parsedLimit = Number(limit);
     const parsedPage = Number(page);
+    let where = {}
+
+    if(category){
+      where = { category: { contains: category, mode: 'insensitive' }}
+    }
 
     const news = await this.prisma.news.findMany({
       skip: (parsedPage - 1) * parsedLimit,
@@ -19,6 +24,7 @@ export class NewsService {
       orderBy: {
         publishedAt: 'desc',
       },
+      where,
       select: {
         id: true,
         title: true,
