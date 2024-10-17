@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { UpdateDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,44 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async updateProfile(userId: number, data: UpdateDto) {
+    const updateData: { email?: string; fullName?: string; phoneNumber?: string } = {};
+  
+    if (data.email) {
+      updateData.email = data.email;
+    }
+  
+    if (data.fullName) {
+      updateData.fullName = data.fullName;
+    }
+  
+    if (data.phoneNumber) {
+      updateData.phoneNumber = data.phoneNumber;
+    }
+    
+    
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+  
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+  
+    if (!user) {
+      throw new Error('User not found');
+    }
+  
+    const { password, ...result } = user;
+    return result;
   }
 
   async register(data: any) {
