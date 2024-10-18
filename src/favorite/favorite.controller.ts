@@ -21,6 +21,8 @@ export class FavoriteController {
   async createFavorite(@Param('newsId') newsId: number, @Req() req: Request): Promise<Favorite> {
     
     const userId = req.user['userId'];
+    console.log(userId, +newsId);
+    
     return this.favoriteService.createFavorite(userId, +newsId);
   }
 

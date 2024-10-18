@@ -77,7 +77,8 @@ export class AuthController {
   @Get()
   async getProfile(@Req() req: Request) {
     try {
-      const userId = req.user.id;
+      
+      const userId = req.user['userId'];
       return await this.authService.getProfile(userId);
     } catch (error) {
       throw new HttpException(error.message || 'Refresh token invalid', HttpStatus.UNAUTHORIZED);
