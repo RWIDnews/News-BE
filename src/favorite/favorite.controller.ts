@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Param, Req, UseGuards, HttpStatus } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { ApiTags, ApiResponse, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -21,7 +21,6 @@ export class FavoriteController {
   async createFavorite(@Param('newsId') newsId: number, @Req() req: Request): Promise<Favorite> {
     
     const userId = req.user['userId'];
-    console.log(userId, +newsId);
     
     return this.favoriteService.createFavorite(userId, +newsId);
   }
@@ -30,8 +29,10 @@ export class FavoriteController {
   @ApiBearerAuth()
   @Delete(':newsId')
   @ApiOperation({ summary: 'Remove a Favorite' })
-  @ApiResponse({ status: 200, description: 'Favorite removed' })
-  async removeFavorite(@Param('newsId') newsId: number, @Req() req: Request): Promise<void> {
+  @ApiResponse({ status: HttpStatus.OK, description: 'Favorite deleted successfully.' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Favorite not found.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Failed to delete favorite.' })
+  async removeFavorite(@Param('newsId') newsId: number, @Req() req: Request): Promise<any> {
     const userId = req.user['userId'];
     await this.favoriteService.removeFavorite(userId, newsId);
   }

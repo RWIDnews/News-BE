@@ -159,7 +159,6 @@ export class ScrapingService {
                 
                     data = response.data[0]
                     data['Data']= mergedData;
-                    console.log(data);
                     
                 } else {
                     data = response.data.Data;

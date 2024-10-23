@@ -24,7 +24,7 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '45m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     // Save refreshToken to the database associated with the user
@@ -105,7 +105,7 @@ export class AuthService {
 
       const accessToken = this.jwtService.sign(
         { email: payload.email, sub: payload.sub },
-        { expiresIn: '15m' },
+        { expiresIn: '45m' },
       );
 
       return { accessToken };

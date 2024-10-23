@@ -29,9 +29,9 @@ export class HistoryController {
   @Delete(':newsId')
   @ApiOperation({ summary: 'Remove a history' })
   @ApiResponse({ status: 200, description: 'history removed' })
-  async removeHistory(@Param('newsId') newsId: number, @Req() req: Request): Promise<void> {
+  async removeHistory(@Param('newsId') newsId: number, @Req() req: Request): Promise<any> {
     const userId = req.user['userId'];
-    await this.historyService.removeHistory(userId, newsId);
+    await this.historyService.removeHistory(userId, +newsId);
   }
   
   @UseGuards(AuthGuard('jwt'))

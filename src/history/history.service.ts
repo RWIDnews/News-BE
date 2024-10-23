@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { History } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
@@ -22,13 +22,35 @@ export class HistoryService {
     });
   }
 
-  async removeHistory(userId: number, newsId: number): Promise<void> {
-    await this.prisma.history.deleteMany({
-      where: {
-        userId,
-        newsId,
-      },
-    });
+  async removeHistory(userId: number, newsId: number): Promise<any> {
+    try {
+      const history = await this.prisma.history.findFirst({
+        where: { userId, newsId },
+      });
+
+      if (!history) {
+        throw new NotFoundException('history not found');
+      }
+
+      await this.prisma.history.deleteMany({
+        where: {
+          userId,
+          newsId: +newsId,
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'hHistory deleted successfully',
+        data: history,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException('Failed to delete history', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
   }
 
   async getUserHistories(userId: number): Promise<History[]> {
